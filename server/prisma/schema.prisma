@@ -1,0 +1,151 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime   @default(now())
+  customers Customer[]
+  email     String
+  firstName String?
+  id        String     @id @default(cuid())
+  isAdmin   Boolean?
+  isStaff   Boolean?
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime   @updatedAt
+  username  String     @unique
+}
+
+model Order {
+  createdAt  DateTime  @default(now())
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+  discount   Float?
+  id         String    @id @default(cuid())
+  product    Product?  @relation(fields: [productId], references: [id])
+  productId  String?
+  quantity   Int?
+  totalPrice Int?
+  updatedAt  DateTime  @updatedAt
+}
+
+model Customer {
+  address   Address? @relation(fields: [addressId], references: [id])
+  addressId String?
+  createdAt DateTime @default(now())
+  email     String?
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  orders    Order[]
+  phone     String?
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model Address {
+  address_1 String?
+  address_2 String?
+  city      String?
+  createdAt DateTime   @default(now())
+  customers Customer[]
+  id        String     @id @default(cuid())
+  state     String?
+  updatedAt DateTime   @updatedAt
+  zip       Int?
+}
+
+model Product {
+  createdAt       DateTime         @default(now())
+  description     String?
+  id              String           @id @default(cuid())
+  name            String?
+  orders          Order[]
+  productMetas    ProductMeta[]
+  productVariants ProductVariant[]
+  slug            String?          @unique
+  updatedAt       DateTime         @updatedAt
+}
+
+model Locale {
+  country      EnumLocaleCountry[]
+  createdAt    DateTime             @default(now())
+  currency     EnumLocaleCurrency[]
+  id           String               @id @default(cuid())
+  name         String?
+  prices       Price[]
+  productMetas ProductMeta[]
+  updatedAt    DateTime             @updatedAt
+}
+
+model ProductMeta {
+  createdAt       DateTime @default(now())
+  description     String?
+  id              String   @id @default(cuid())
+  locale          Locale?  @relation(fields: [localeId], references: [id])
+  localeId        String?
+  metaDescription String?
+  metaTitle       String?
+  product         Product? @relation(fields: [productId], references: [id])
+  productId       String?
+  title           String?
+  updatedAt       DateTime @updatedAt
+}
+
+model Image {
+  altText   String?
+  createdAt DateTime @default(now())
+  featured  Boolean?
+  height    String?
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+  url       String?
+  width     String?
+}
+
+model ProductVariant {
+  createdAt DateTime @default(now())
+  height    Int?
+  id        String   @id @default(cuid())
+  price     Price?   @relation(fields: [priceId], references: [id])
+  priceId   String?
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?
+  title     String?
+  updatedAt DateTime @updatedAt
+  width     Int?
+}
+
+model Price {
+  createdAt       DateTime         @default(now())
+  description     String?
+  id              String           @id @default(cuid())
+  locale          Locale?          @relation(fields: [localeId], references: [id])
+  localeId        String?
+  name            String?
+  productVariants ProductVariant[]
+  updatedAt       DateTime         @updatedAt
+}
+
+enum EnumLocaleCountry {
+  USA
+  Turkey
+  Germany
+  France
+  UK
+  Japan
+}
+
+enum EnumLocaleCurrency {
+  USD
+  TRY
+  EUR
+  GBP
+}
